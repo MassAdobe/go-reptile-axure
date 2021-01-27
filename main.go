@@ -53,6 +53,7 @@ func main() {
 	downloadMainFile(getHref(mainHeads), getSrc(mainHeads))
 	// 整理document内容
 	htmls := getOtherHtmls(documentInner)
+	// 获取所有子页面，包括子页面的所有的srcs和hrefs
 	getOthers(htmls)
 }
 
