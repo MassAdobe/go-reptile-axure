@@ -39,11 +39,17 @@ func init() {
 }
 
 func main() {
+	// 创建相关文件夹
+	pathExists(downloadLocation[:len(downloadLocation)-1])
 	// 删除文件夹下所有内容
 	dir := downloadLocation[:len(downloadLocation)-1]
 	dirr, _ := ioutil.ReadDir(dir)
 	for _, d := range dirr {
-		os.RemoveAll(path.Join([]string{dir, d.Name()}...))
+		err := os.RemoveAll(path.Join([]string{dir, d.Name()}...))
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 	// 获取头页面信息
 	mainPageHtml := get(fmt.Sprintf("%s%s", prdAddress, prdMainPage))
