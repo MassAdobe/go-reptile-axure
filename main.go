@@ -26,9 +26,11 @@ var (
 )
 
 const (
-	downloadLocation = "/Users/zhangzhen/Downloads/magicMirror/"
-	prdAddress       = "http://10.16.32.149/web/mojing/"
-	prdMainPage      = "index.html"
+	downloadLocation  = "/Users/zhangzhen/Downloads/magicMirror2/"
+	prdAddress        = "http://10.16.32.149/web/mojing/"
+	prdMainPage       = "index.html"
+	baseComponent     = "plugins/sitemap/styles/"
+	baseComponentName = "sitemap.css"
 )
 
 func init() {
@@ -61,6 +63,8 @@ func main() {
 	htmls := getOtherHtmls(documentInner)
 	// 获取所有子页面，包括子页面的所有的srcs和hrefs
 	getOthers(htmls)
+	// 获取基本框架内容
+	getBaseComponent()
 }
 
 /**
@@ -361,4 +365,51 @@ func getOthers(others []string) {
 			downloadPicFile(inners)
 		}
 	}
+}
+
+/**
+ * @Author: MassAdobe
+ * @TIME: 2021/1/27 2:10 下午
+ * @Description: 获取基本框架内容
+**/
+func getBaseComponent() {
+	inner := get(fmt.Sprintf("%s%s%s", prdAddress, baseComponent, baseComponentName))
+	urls := getBaseComponentUrl(inner)
+	if len(urls) != 0 {
+		for _, url := range urls {
+			writeComponentToFile(url, get(fmt.Sprintf("%s%s%s", prdAddress, baseComponent, url)))
+		}
+	}
+}
+
+/**
+ * @Author: MassAdobe
+ * @TIME: 2021/1/26 4:55 下午
+ * @Description: 写文件
+**/
+func writeComponentToFile(fileName, inner string) {
+	if err := ioutil.WriteFile(pathExists(downloadLocation+baseComponent+fileName), []byte(inner), 777); err != nil {
+		log.Println(err.Error())
+		os.Exit(1)
+	}
+}
+
+/**
+ * @Author: MassAdobe
+ * @TIME: 2021/1/26 8:18 下午
+ * @Description: 获取返回html
+**/
+func getBaseComponentUrl(inner string) []string {
+	components := make([]string, 0)
+	componentsPattern := `url\('([\s\S]*?)'\)`
+	re := regexp.MustCompile(componentsPattern)
+	allString := re.FindAllString(inner, -1)
+	for _, v := range allString {
+		index := strings.Index(v[5:], `'`)
+		components = append(components, v[5:index+5])
+	}
+	if len(components) != 0 {
+		return components
+	}
+	return nil
 }
